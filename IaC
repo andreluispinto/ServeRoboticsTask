@@ -1,0 +1,56 @@
+This Terraform configuration sets up an AWS Elastic Container Registry (ECR) repository for the MNIST model
+ Docker image, an ECS cluster to run the model service, and an ECS service to deploy the model. 
+ The infrastructure is defined as code, making it easy to reproduce and scale as needed.
+
+
+
+provider "aws" {
+  region = "us-east-1"
+}
+
+# Create an ECR repository for the MNIST model Docker image
+resource "aws_ecr_repository" "mnist_ecr" {
+  name = "mnist-model"
+}
+
+# Create an ECS cluster to run the MNIST model service
+resource "aws_ecs_cluster" "mnist_cluster" {
+  name = "mnist-cluster"
+}
+
+# Create an ECS task definition for the MNIST model service
+resource "aws_ecs_task_definition" "mnist_task" {
+  family                   = "mnist-task"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = 256
+  memory                   = 512
+  container_definitions    = <<DEFINITION
+[
+  {
+    "name": "mnist-model",
+    "image": "${aws_ecr_repository.mnist_ecr.repository_url}:latest",
+    "portMappings": [
+      {
+        "containerPort": 5000,
+        "hostPort": 5000
+      }
+    ]
+  }
+]
+DEFINITION
+}
+
+# Create an ECS service to run the MNIST model
+resource "aws_ecs_service" "mnist_service" {
+  name            = "mnist-service"
+  cluster         = aws_ecs_cluster.mnist_cluster.id
+  task_definition = aws_ecs_task_definition.mnist_task.arn
+  desired_count   = 2
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = ["subnet-abcd1234", "subnet-wxyz5678"]
+    security_groups  = ["sg-0123456789abcdef"]
+  }
+}
