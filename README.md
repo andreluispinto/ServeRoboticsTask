@@ -1,6 +1,24 @@
 # ServeRoboticsTask
 
-Requirements:
+This pipeline includes the following steps:
+
+Load the MNIST dataset using the TensorFlow Keras API.
+Preprocess the data by normalizing the pixel values and reshaping the images to fit the model input.
+Define the model architecture using the TensorFlow Keras Sequential API. The model includes three convolutional layers, two max-pooling layers, two fully connected layers, and an output layer.
+Compile the model with the Adam optimizer and categorical cross-entropy loss.
+Train the model for 10 epochs with a batch size of 32, using the validation data to monitor performance.
+Evaluate the model on the test set and print the test loss and accuracy.
+Save the trained model to a file for later use.
+For the inference server, you can use the saved model to make predictions on new images.
+
+# Implementation
+This implementation uses the Flask web framework to create a REST API endpoint that accepts raw image data as input and returns the predicted digit and its probability as output. The server loads the pre-trained model and uses it to make predictions on the input image.
+
+To use the inference server, you can send a POST request to the /predict endpoint with the image data in the request body, like the json file.
+
+The server will respond with the predicted digit and its probability, please look at predicted.py file.
+
+# Requirements:
 1. Environment Setup:
 Set up a reproducible environment using Docker or other containerization technologies.
 Provide a Dockerfile that creates an environment with all dependencies necessary to train and serve a model.
